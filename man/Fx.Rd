@@ -17,7 +17,3 @@ Fx(S, logf)
 \description{
 Title
 }
-\examples{
-.
-
-}

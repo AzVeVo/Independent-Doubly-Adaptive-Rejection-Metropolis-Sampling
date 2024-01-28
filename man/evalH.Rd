@@ -4,27 +4,22 @@
 \alias{evalH}
 \title{Title}
 \usage{
-evalH(x, parLI, parLS, S, intervalos, a)
+evalH(x, S, intervalos, a, logf)
 }
 \arguments{
 \item{x}{.}
-
-\item{parLI}{.}
-
-\item{parLS}{.}
 
 \item{S}{.}
 
 \item{intervalos}{.}
 
 \item{a}{.}
+
+\item{logf}{log}
 }
 \value{
 .
 }
 \description{
 Title
-}
-\examples{
-.
 }

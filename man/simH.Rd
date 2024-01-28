@@ -21,6 +21,3 @@ simH(S, logf, Probs, num.sim)
 \description{
 Title
 }
-\examples{
-.
-}

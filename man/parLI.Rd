@@ -4,7 +4,7 @@
 \alias{parLI}
 \title{Title}
 \usage{
-parLI(S, x, sim, eval, cum)
+parLI(S, x, sim, eval, cum, logf)
 }
 \arguments{
 \item{S}{.}
@@ -16,14 +16,12 @@ parLI(S, x, sim, eval, cum)
 \item{eval}{.}
 
 \item{cum}{.}
+
+\item{logf}{log}
 }
 \value{
 .
 }
 \description{
 Title
-}
-\examples{
-.
-
 }

@@ -9,13 +9,14 @@
 #' @param sim .
 #' @param eval .
 #' @param cum .
+#' @param logf log
 #'
 #' @return .
 #'
 #'
-#' @examples .
 #'
-parLI <- function(S, x, sim, eval, cum){
+#'
+parLI <- function(S, x, sim, eval, cum, logf){
 
 
   mu1 <- S[4]
@@ -54,12 +55,13 @@ parLI <- function(S, x, sim, eval, cum){
 #' @param eval .
 #' @param sim .
 #' @param cum .
+#' @param logf log
 #'
 #' @return .
 #'
 #'
-#' @examples .
-parLS <- function(S, x, eval, sim, cum){
+#'
+parLS <- function(S, x, eval, sim, cum, logf){
 
   j <- length(S)
 
@@ -108,7 +110,7 @@ parLS <- function(S, x, eval, sim, cum){
 #' @return .
 #'
 #'
-#' @examples .
+#'
 #'
 Fx <- function(S, logf){
 
@@ -125,8 +127,8 @@ Fx <- function(S, logf){
     if ((i > 2) & (i < j) ) a <- c(a, max(logf(intervalos[(i-1),1]), logf(intervalos[(i-1),2])))
   }
 
-  intI <- integrate(parLI, lower = S[1], upper = S[2], S = S,eval = F, sim = F,  cum = T)
-  intS <- integrate(parLS, lower = S[j-1], upper = S[j], S = S,eval = F, sim = F,  cum = T)
+  intI <- integrate(parLI, lower = S[1], upper = S[2], S = S,eval = F, sim = F,  cum = T, logf)
+  intS <- integrate(parLS, lower = S[j-1], upper = S[j], S = S,eval = F, sim = F,  cum = T, logf)
 
   m <- sum(exp(a)* (intervalos[2:(j-2),2] - intervalos[2:(j-2),1])) + intI$value + intS$value
 
@@ -166,7 +168,7 @@ Fx <- function(S, logf){
 #' @return .
 #'
 #'
-#' @examples .
+#'
 simH <- function(S, logf, Probs, num.sim){
 
   values <- NULL
@@ -181,11 +183,11 @@ simH <- function(S, logf, Probs, num.sim){
 
     r <- which(bol)
     if (r == 1) {
-      v <- parLI(S, sim = T, eval = F, cum = F)
+      v <- parLI(S, sim = T, eval = F, cum = F, logf = logf)
       values <- c(values,v)
     }
     if (r == (length(S) - 1)){
-      v <- parLS(S, sim = T, eval = F, cum = F)
+      v <- parLS(S, sim = T, eval = F, cum = F, logf = logf)
       values <- c(values,v)
     }
     if (all(r != c(1, (length(S) - 1)))){
@@ -207,17 +209,16 @@ simH <- function(S, logf, Probs, num.sim){
 #' Title
 #'
 #' @param x .
-#' @param parLI .
-#' @param parLS .
 #' @param S .
 #' @param intervalos .
 #' @param a .
+#' @param logf log
 #'
 #' @return .
 #'
 #'
-#' @examples .
-evalH <- function(x, parLI, parLS, S, intervalos, a){
+#'
+evalH <- function(x, S, intervalos, a, logf){
 
   j <- length(S)
 
@@ -229,8 +230,8 @@ evalH <- function(x, parLI, parLS, S, intervalos, a){
 
   bol <- which(bol)
 
-  if (bol == 1) return(parLI(S, x = x, sim = F, eval = F, cum = T))
-  if (bol == (j - 1)){ return(parLS(S, x = x, sim = F, eval = F, cum = T))
+  if (bol == 1) return(parLI(S, x = x, sim = F, eval = F, cum = T, logf = logf))
+  if (bol == (j - 1)){ return(parLS(S, x = x, sim = F, eval = F, cum = T, logf = logf))
   }else{
     return(exp(a[bol-1]))
   }
@@ -247,25 +248,23 @@ evalH <- function(x, parLI, parLS, S, intervalos, a){
 #' @param y.initial Value inside the domain of the target density
 #' @param logf log of the target density. (Class function)
 #' @param indFunc Indicator function for the domain of the target density. (Class function)
-#' @param n.sample Number of samples to draw from the taret density
+#' @param n.sample Number of samples to draw from the target density
 #'
 #' @return Sample of lenght n.sample
-
-#' @importFrom stats runif integrate
+#' @importFrom stats runif integrate dt dnorm
 #' @importFrom dplyr between
 #' @importFrom dlm convex.bounds
-
 #' @examples
-#' y.initial <- 0.8
-#' n.sample <- 5000
-#' logf <- function(x) log(0.3 * dt(x, 3.2) + 0.35*dnorm(x,mean = 2.5, 0.3) + 0.5*dt(x, 1))
+#'
+#' logf <- function(x) log(prod(0.3,dt(x, 3.2)) + prod(0.35,dnorm(x, 2.5, 0.3)) + prod(0.5,dt(x, 1)))
 #' indFunc <- function(x) all(x > -5) * all(x < 6)
-#' y <- Ia2rms(y.initial, logf, indFunc, n.sample)
-#' hist(y[[1]],breaks = 50, probability = T, ylim = c(0,0.5))
-#' curve(exp(Vectorize(logf)(x)), -5, 8, ylab = "f(x)", main = "Representación de f(x) y g(x)", add = T)
+#' y <- Ia2rms(y.initial = 0.8, logf = logf, indFunc = indFunc, n.sample = 1000)
+#' hist(y,breaks = 50, probability = TRUE, ylim = c(0,0.5))
+#' curve(exp(Vectorize(logf)(x)), -5, 8, ylab = "f(x)", add = TRUE)
 #' legend(legend = c("f(x)", "g(x)"), col = c("black", "blue"), x = "topleft", lty = c(1, 1))
 #'
 #' @export
+#'
 #'
 Ia2rms <- function(y.initial, logf, indFunc, n.sample){
 
@@ -302,11 +301,11 @@ Ia2rms <- function(y.initial, logf, indFunc, n.sample){
 
     k <- k + 1
     x <- simH(S = S, logf = logf, Probs = Probs, num.sim = 1)
-    pix <- evalH(x, parLI, parLS, S, path[[2]], path[[3]])
+    pix <- evalH(x, S, path[[2]], path[[3]], logf = logf)
 
     if (runif(1) <= exp(logf(x))/pix){
 
-      alpha <- min(1, (exp(logf(x)) * min(exp(logf(x0)), evalH(x0, parLI, parLS, S, path[[2]], path[[3]])))/ (exp(logf(x0)) * min(exp(logf(x)), pix)))
+      alpha <- min(1, (exp(logf(x)) * min(exp(logf(x0)), evalH(x0, S, path[[2]], path[[3]], logf = logf)))/ (exp(logf(x0)) * min(exp(logf(x)), pix)))
 
 
       if (runif(1) <= alpha){
@@ -319,7 +318,7 @@ Ia2rms <- function(y.initial, logf, indFunc, n.sample){
         y <- x
       }
 
-      if (runif(1) > evalH(y, parLI, parLS, S, path[[2]], path[[3]])/exp(logf(y)) & (length(S) < 80)){
+      if (runif(1) > evalH(y, S, path[[2]], path[[3]],logf =  logf)/exp(logf(y)) & (length(S) < 80)){
 
         S <- sort(c(y,S))
         path <- Fx(S, logf)

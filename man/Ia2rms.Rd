@@ -13,7 +13,7 @@ Ia2rms(y.initial, logf, indFunc, n.sample)
 
 \item{indFunc}{Indicator function for the domain of the target density. (Class function)}
 
-\item{n.sample}{Number of samples to draw from the taret density}
+\item{n.sample}{Number of samples to draw from the target density}
 }
 \value{
 Sample of lenght n.sample
@@ -22,13 +22,12 @@ Sample of lenght n.sample
 Independent Doubly Adaptive Rejection Metropolis Sampling
 }
 \examples{
-y.initial <- 0.8
-n.sample <- 5000
-logf <- function(x) log(0.3 * dt(x, 3.2) + 0.35*dnorm(x,mean = 2.5, 0.3) + 0.5*dt(x, 1))
+
+logf <- function(x) log(prod(0.3,dt(x, 3.2)) + prod(0.35,dnorm(x, 2.5, 0.3)) + prod(0.5,dt(x, 1)))
 indFunc <- function(x) all(x > -5) * all(x < 6)
-y <- Ia2rms(y.initial, logf, indFunc, n.sample)
-hist(y[[1]],breaks = 50, probability = T, ylim = c(0,0.5))
-curve(exp(Vectorize(logf)(x)), -5, 8, ylab = "f(x)", main = "Representación de f(x) y g(x)", add = T)
+y <- Ia2rms(y.initial = 0.8, logf = logf, indFunc = indFunc, n.sample = 1000)
+hist(y,breaks = 50, probability = TRUE, ylim = c(0,0.5))
+curve(exp(Vectorize(logf)(x)), -5, 8, ylab = "f(x)", add = TRUE)
 legend(legend = c("f(x)", "g(x)"), col = c("black", "blue"), x = "topleft", lty = c(1, 1))
 
 }
